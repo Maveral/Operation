@@ -8,17 +8,35 @@
 class App < HyperComponent
   include Hyperstack::Router
 
-  # define routes using the Route psuedo component.  Examples:
-  # Route('/foo', mounts: Foo)                : match the path beginning with /foo and mount component Foo here
-  # Route('/foo') { Foo(...) }                : display the contents of the block
-  # Route('/', exact: true, mounts: Home)     : match the exact path / and mount the Home component
-  # Route('/user/:id/name', mounts: UserName) : path segments beginning with a colon will be captured in the match param
-  # see the hyper-router gem documentation for more details
+  before_mount do
+
+    # we will attach our component to Move's dispatcher
+
+    # and mutate some state when it dispatches to us
+
+    Move.on_dispatch { |params| mutate @move = params.move }
+
+    # we also will initialize our state so it's in sync with @count
+
+    @move = 'move2'
+
+  end
 
   render(DIV) do
-    H1 { "Hello world from Hyperstack!" }
-    BUTTON {"Click me"}.on(:click) do
-      alert("All working!")
+
+    DIV(class: @move) do
+
+      "Click me :)"
+
+    end.on(:click) do
+
+      @count == 1 ? @count = 2 : @count = 1
+
+      # Move will execute on the server
+
+      Move.run(move: "move#{@count}")
+
     end
+
   end
 end
